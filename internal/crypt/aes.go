@@ -9,9 +9,10 @@ import (
 // TODO:
 // 	 - Revise 
 
-// Encrypt the password with the master and return the byte string of 
-// nonce + ciphertext.
-func Encrypt(password, master []byte) ([]byte, error) {
+// Encrypt the key (plaintext) with the master (aes key) and return the byte string of 
+// IV + ciphertext (one may argue that the IV or nouce is part of the ciphertext, so for the this
+// function the IV is not part of the ciphertext but appended to it).
+func Encrypt(key, master []byte) ([]byte, error) {
 	key32bytes := sha512.Sum512_256(master) //The keys need to be 32 bytes, so in order to allow any key size for users I hash the master key.
 
 	block, err := aes.NewCipher(key32bytes[:])
@@ -24,12 +25,12 @@ func Encrypt(password, master []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	nonce, err := Random_bytes(aesGCM.NonceSize())
+	IV, err := Random_bytes(aesGCM.NonceSize())
 	if err != nil {
 		return nil, err
 	}
 
-	ciphertext := aesGCM.Seal(nonce, nonce, password, nil)
+	ciphertext := aesGCM.Seal(IV, IV, key, nil)
 	return ciphertext, nil
 }
 
