@@ -61,10 +61,11 @@ func Insert_user(db *sql.DB, user *models.User) error {
 }
 
 func Insert_key(db *sql.DB, key *models.Key) error {
-	exist, err := Has_user(db, key.Account)
+	exist, err := Has_key(db, key.User_ID, key.Account)
 	if err != nil {
 		return err
 	}
+
 	if exist {
 		query := `UPDATE Keys SET account = ?, key = ? WHERE user_id = ?`
 		_, err = db.Exec(query, key.Account, key.Key, key.User_ID)
@@ -73,11 +74,13 @@ func Insert_key(db *sql.DB, key *models.Key) error {
 		}
 		return nil
 	}
+
 	query := `INSERT INTO Keys(user_id, account, key) VALUES(?, ?, ?)`
 	_, err = db.Exec(query, key.User_ID, key.Account, key.Key)
 	if err != nil {
 		return err
 	}
+	
 	return nil
 }
 
@@ -130,9 +133,9 @@ func Has_user(db *sql.DB, username string) (bool, error) {
 	return exist, nil
 }
 
-func Has_key(db *sql.DB, user_ID string) (bool, error) {
+func Has_key(db *sql.DB, user_ID int, account string) (bool, error) {
 	var exist bool
-	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM Keys WHERE user_id = ?)", user_ID).Scan(&exist)
+	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM Keys WHERE account = ? AND user_id = ?)", account, user_ID).Scan(&exist)
 	if err != nil && err != sql.ErrNoRows {
 		return false, err
 	}

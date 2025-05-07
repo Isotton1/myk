@@ -63,6 +63,15 @@ func New_acc(db *sql.DB, user models.User, account string, master, key []byte) e
 	return nil
 }
 
+// Yes, this is just a wrapper.
+func Remove_acc(db *sql.DB, user_ID int, account string) error {
+	err := database.Remove_key(db, user_ID, account)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func Verify_master(user models.User, master_key []byte) bool {
 	master_hash := user.Master_key
 	salt := user.Salt
