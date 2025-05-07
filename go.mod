@@ -1,6 +1,6 @@
 module github.com/Isotton1/myk
 
-go 1.21.1
+go 1.22.3
 
 require modernc.org/sqlite v1.29.2
 
