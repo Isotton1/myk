@@ -67,8 +67,8 @@ func Insert_key(db *sql.DB, key *models.Key) error {
 	}
 
 	if exist {
-		query := `UPDATE Keys SET account = ?, key = ? WHERE user_id = ?`
-		_, err = db.Exec(query, key.Account, key.Key, key.User_ID)
+		query := `UPDATE Keys SET key = ? WHERE user_id = ? AND account = ?`
+		_, err = db.Exec(query, key.Key, key.User_ID, key.Account)
 		if err != nil {
 			return err
 		}
@@ -77,6 +77,25 @@ func Insert_key(db *sql.DB, key *models.Key) error {
 
 	query := `INSERT INTO Keys(user_id, account, key) VALUES(?, ?, ?)`
 	_, err = db.Exec(query, key.User_ID, key.Account, key.Key)
+	if err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+func Remove_key(db *sql.DB, user_ID int, account string) error {
+	exist, err := Has_key(db, user_ID, account)
+	if err != nil {
+		return err
+	}
+	
+	if !exist {
+		return common.ErrNoAccFound
+	}
+
+	query := `DELETE FROM Keys WHERE user_id = ? AND account = ?`
+	_, err = db.Exec(query, user_ID, account)
 	if err != nil {
 		return err
 	}
